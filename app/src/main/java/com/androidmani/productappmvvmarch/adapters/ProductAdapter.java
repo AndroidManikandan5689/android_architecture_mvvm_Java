@@ -40,6 +40,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
         return products.size();
     }
 
+    public Product getProductAt(int position)
+    {
+        return products.get(position);
+    }
+
     public void setProducts(List<Product> product)
     {
         this.products = product;
