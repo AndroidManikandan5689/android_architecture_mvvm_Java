@@ -73,12 +73,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
-                if(viewHolder.getAdapterPosition() != 0) {
                     Product product = productAdapter.getProductAt(viewHolder.getAdapterPosition());
                     productViewModel.deleteProduct(product);
                     productAdapter.notifyDataSetChanged();
                     Toast.makeText(MainActivity.this, "Product deleted", Toast.LENGTH_SHORT).show();
-                }
 
             }
         }).attachToRecyclerView(recyclerView);
@@ -87,11 +85,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId())
-        {
-            case R.id.add_note:
-                startActivityForResult(new Intent(MainActivity.this, AddProductActivity.class), PRODUCT_REQUEST_CODE);
-                break;
+        if (v.getId() == R.id.add_note) {
+            startActivityForResult(new Intent(MainActivity.this, AddProductActivity.class), PRODUCT_REQUEST_CODE);
         }
     }
 
@@ -99,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == PRODUCT_REQUEST_CODE && resultCode == RESULT_OK)
+        if(requestCode == PRODUCT_REQUEST_CODE && resultCode == RESULT_OK && data != null)
         {
             String name = data.getStringExtra(AddProductActivity.KEY_PRODUCT_NAME);
             int price = data.getIntExtra(AddProductActivity.KEY_PRODUCT_PRICE, 1);
@@ -109,6 +104,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             productViewModel.insertProduct(product);
             Toast.makeText(this, "Product saved...", Toast.LENGTH_SHORT).show();
 
+        }
+        else
+        {
+            Toast.makeText(this, "Product not saved...", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -125,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             case R.id.delete_all_menu:
                 productViewModel.deleteAllProduct();
+                productAdapter.notifyDataSetChanged();
                 Toast.makeText(this, "Deleted all product", Toast.LENGTH_SHORT).show();
                 return true;
                 default:
