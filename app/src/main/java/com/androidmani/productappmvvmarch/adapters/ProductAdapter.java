@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.androidmani.productappmvvmarch.R;
@@ -14,10 +16,27 @@ import com.androidmani.productappmvvmarch.room.Product;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductHolder> {
+public class ProductAdapter extends ListAdapter<Product, ProductAdapter.ProductHolder> {
 
-    private List<Product> products = new ArrayList<>();
     ProductItemClickListener listener;
+
+    public ProductAdapter() {
+        super(DIFF_PRODUCT_CALLBACK);
+    }
+
+    private static final DiffUtil.ItemCallback<Product> DIFF_PRODUCT_CALLBACK = new DiffUtil.ItemCallback<Product>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull Product oldItem, @NonNull Product newItem) {
+            return oldItem.getId() == newItem.getId();
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull Product oldItem, @NonNull Product newItem) {
+            return oldItem.getName().equals(newItem.getName()) &&
+                    oldItem.getPrice() == newItem.getPrice() &&
+                    oldItem.getDescription().equals(newItem.getDescription());
+        }
+    };
 
     @NonNull
     @Override
@@ -29,26 +48,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
     @Override
     public void onBindViewHolder(@NonNull ProductHolder holder, int position) {
 
-        Product product = products.get(position);
+        Product product = getItem(position);
         holder.tv_name.setText(product.getName());
         holder.tv_price.setText(String.valueOf(product.getPrice()));
         holder.tv_desc.setText(product.getDescription());
 
     }
 
-    @Override
-    public int getItemCount() {
-        return products.size();
-    }
 
     public Product getProductAt(int position)
     {
-        return products.get(position);
-    }
-
-    public void setProducts(List<Product> product)
-    {
-        this.products = product;
+        return getItem(position);
     }
 
     class ProductHolder extends RecyclerView.ViewHolder{
@@ -64,7 +74,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listener.updateProductItem(products.get(getAdapterPosition()));
+                    listener.updateProductItem(getItem(getAdapterPosition()));
                 }
             });
         }

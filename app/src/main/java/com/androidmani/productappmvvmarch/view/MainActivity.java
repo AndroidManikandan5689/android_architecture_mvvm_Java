@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         productViewModel.getAllProduct().observe(this, new Observer<List<Product>>() {
             @Override
             public void onChanged(List<Product> products) {
-                productAdapter.setProducts(products);
+                productAdapter.submitList(products);
             }
         });
 
@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     Product product = productAdapter.getProductAt(viewHolder.getAdapterPosition());
                     productViewModel.deleteProduct(product);
-                    productAdapter.notifyDataSetChanged();
                     Toast.makeText(MainActivity.this, "Product deleted", Toast.LENGTH_SHORT).show();
 
             }
@@ -122,10 +121,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             Product product = new Product(name, Integer.valueOf(price), desc);
             productViewModel.insertProduct(product);
-            Toast.makeText(this, "Product saved..."+name+"price"+price+"desc - "+desc, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Product saved...", Toast.LENGTH_SHORT).show();
 
         }
         else if (requestCode == PRODUCT_EDIT_REQUEST_CODE && resultCode == RESULT_OK && data != null){
+            String name = data.getStringExtra(AddEditProductActivity.EXTRA_PRODUCT_NAME);
+            String price = data.getStringExtra(AddEditProductActivity.EXTRA_PRODUCT_PRICE);
+            String desc = data.getStringExtra(AddEditProductActivity.EXTRA_PRODUCT_DESC);
+
+            String id = data.getStringExtra(AddEditProductActivity.EXTRA_PRODUCT_ID);
+            if(id != null) {
+                if (Integer.parseInt(id) == -1) {
+                    Toast.makeText(this, "Product not updated", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            Product product = new Product(name, Integer.valueOf(price), desc);
+            product.setId(Integer.parseInt(id));
+            productViewModel.updateProduct(product);
+            Toast.makeText(this, "Product updated...", Toast.LENGTH_SHORT).show();
 
         }
         else
