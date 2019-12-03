@@ -17,6 +17,7 @@ import java.util.List;
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductHolder> {
 
     private List<Product> products = new ArrayList<>();
+    ProductItemClickListener listener;
 
     @NonNull
     @Override
@@ -60,6 +61,23 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductH
             tv_name = itemView.findViewById(R.id.tv_name);
             tv_price = itemView.findViewById(R.id.tv_price);
             tv_desc = itemView.findViewById(R.id.tv_desc);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.updateProductItem(products.get(getAdapterPosition()));
+                }
+            });
         }
     }
+
+    public interface ProductItemClickListener {
+        void updateProductItem(Product product);
+    }
+
+    public void ItemClickEvent(ProductItemClickListener productItemClickListener)
+    {
+        this.listener = productItemClickListener;
+    }
+
+
 }

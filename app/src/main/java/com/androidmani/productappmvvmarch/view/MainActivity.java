@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,14 +21,15 @@ import com.androidmani.productappmvvmarch.R;
 import com.androidmani.productappmvvmarch.adapters.ProductAdapter;
 import com.androidmani.productappmvvmarch.room.Product;
 import com.androidmani.productappmvvmarch.viewmodel.ProductViewModel;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.facebook.stetho.Stetho;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 
-    public static final int PRODUCT_REQUEST_CODE = 1;
+    public static final int PRODUCT_ADD_REQUEST_CODE = 1;
+    public static final int PRODUCT_EDIT_REQUEST_CODE = 2;
 
     ProductViewModel productViewModel;
     RecyclerView recyclerView;
@@ -39,6 +39,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Stetho.initialize(
+                Stetho.newInitializerBuilder(this)
+                        .enableDumpapp(
+                                Stetho.defaultDumperPluginsProvider(this))
+                        .enableWebKitInspector(
+                                Stetho.defaultInspectorModulesProvider(this))
+                        .build());
 
         recyclerView = findViewById(R.id.rv_product);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -53,6 +61,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onChanged(List<Product> products) {
                 productAdapter.setProducts(products);
+            }
+        });
+
+        productAdapter.ItemClickEvent(new ProductAdapter.ProductItemClickListener() {
+            @Override
+            public void updateProductItem(Product product) {
+                Intent editProduct = new Intent(MainActivity.this, AddEditProductActivity.class);
+                editProduct.putExtra(AddEditProductActivity.EXTRA_PRODUCT_ID, product.getId());
+                editProduct.putExtra(AddEditProductActivity.EXTRA_PRODUCT_NAME, product.getName());
+                editProduct.putExtra(AddEditProductActivity.EXTRA_PRODUCT_PRICE, String.valueOf(product.getPrice()));
+                editProduct.putExtra(AddEditProductActivity.EXTRA_PRODUCT_DESC, product.getDescription());
+                startActivityForResult(editProduct, PRODUCT_EDIT_REQUEST_CODE);
             }
         });
 
@@ -86,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.add_note) {
-            startActivityForResult(new Intent(MainActivity.this, AddProductActivity.class), PRODUCT_REQUEST_CODE);
+            startActivityForResult(new Intent(MainActivity.this, AddEditProductActivity.class), PRODUCT_ADD_REQUEST_CODE);
         }
     }
 
@@ -94,15 +114,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == PRODUCT_REQUEST_CODE && resultCode == RESULT_OK && data != null)
+        if(requestCode == PRODUCT_ADD_REQUEST_CODE && resultCode == RESULT_OK && data != null)
         {
-            String name = data.getStringExtra(AddProductActivity.KEY_PRODUCT_NAME);
-            int price = data.getIntExtra(AddProductActivity.KEY_PRODUCT_PRICE, 1);
-            String desc = data.getStringExtra(AddProductActivity.KEY_PRODUCT_DESC);
+            String name = data.getStringExtra(AddEditProductActivity.EXTRA_PRODUCT_NAME);
+            String price = data.getStringExtra(AddEditProductActivity.EXTRA_PRODUCT_PRICE);
+            String desc = data.getStringExtra(AddEditProductActivity.EXTRA_PRODUCT_DESC);
 
-            Product product = new Product(name, price, desc);
+            Product product = new Product(name, Integer.valueOf(price), desc);
             productViewModel.insertProduct(product);
-            Toast.makeText(this, "Product saved...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Product saved..."+name+"price"+price+"desc - "+desc, Toast.LENGTH_SHORT).show();
+
+        }
+        else if (requestCode == PRODUCT_EDIT_REQUEST_CODE && resultCode == RESULT_OK && data != null){
 
         }
         else

@@ -12,13 +12,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.androidmani.productappmvvmarch.R;
-import com.androidmani.productappmvvmarch.room.Product;
 
-public class AddProductActivity extends AppCompatActivity {
+public class AddEditProductActivity extends AppCompatActivity {
 
-    public static final String KEY_PRODUCT_NAME = "name";
-    public static final String KEY_PRODUCT_PRICE = "price";
-    public static final String KEY_PRODUCT_DESC = "description";
+    public static final String EXTRA_PRODUCT_ID = "com.androidmani.productappmvvmarch.view.id";
+    public static final String EXTRA_PRODUCT_NAME = "com.androidmani.productappmvvmarch.view.name";
+    public static final String EXTRA_PRODUCT_PRICE = "com.androidmani.productappmvvmarch.view.price";
+    public static final String EXTRA_PRODUCT_DESC = "com.androidmani.productappmvvmarch.view.description";
 
     EditText editTextProductName;
     EditText editTextPrice;
@@ -37,11 +37,24 @@ public class AddProductActivity extends AppCompatActivity {
     private void initView() {
 
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
-        setTitle("Add Product");
+
+        Intent intent = getIntent();
 
         editTextProductName = findViewById(R.id.edit_name);
         editTextPrice = findViewById(R.id.edit_price);
-        editTextDescription = findViewById(R.id.edit_price);
+        editTextDescription = findViewById(R.id.edit_description);
+
+        if(intent.hasExtra(EXTRA_PRODUCT_ID))
+        {
+            setTitle("Edit Product");
+            editTextProductName.setText(getIntent().getExtras().getString(EXTRA_PRODUCT_NAME));
+            editTextPrice.setText(getIntent().getExtras().getString(EXTRA_PRODUCT_PRICE));
+            editTextDescription.setText(getIntent().getExtras().getString(EXTRA_PRODUCT_DESC));
+        }
+        else {
+            setTitle("Add Product");
+        }
+
     }
 
     @Override
@@ -75,9 +88,16 @@ public class AddProductActivity extends AppCompatActivity {
         }
 
         Intent intent = new Intent();
-        intent.putExtra(KEY_PRODUCT_NAME, name);
-        intent.putExtra(KEY_PRODUCT_PRICE, price);
-        intent.putExtra(KEY_PRODUCT_DESC, desc);
+        intent.putExtra(EXTRA_PRODUCT_NAME, name);
+        intent.putExtra(EXTRA_PRODUCT_PRICE, price);
+        intent.putExtra(EXTRA_PRODUCT_DESC, desc);
+
+        Intent intent1 = getIntent();
+        if(intent1.hasExtra(EXTRA_PRODUCT_ID))
+        {
+            intent.putExtra(EXTRA_PRODUCT_ID, intent1.getExtras().getString(EXTRA_PRODUCT_ID));
+        }
+
         setResult(RESULT_OK, intent);
         finish();
     }
